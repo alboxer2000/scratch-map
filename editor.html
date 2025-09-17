@@ -139,7 +139,8 @@
     <div class="tool-bar">
         <button id="drawToolBtn" class="tool-btn active">Add Point</button>
         <button id="connectToolBtn" class="tool-btn">Connect</button>
-        <button id="saveBtn" class="btn btn-primary">Save Map</button>
+        <button id="saveMapBtn" class="btn btn-primary">Save Map</button>
+        <button id="saveCategoriesBtn" class="btn btn-primary">Save Categories</button>
         <label for="loadMapBtn" class="btn btn-primary text-center">Load Map</label>
         <input type="file" id="loadMapBtn" accept=".json">
         <label for="loadCategoriesBtn" class="btn btn-primary text-center">Load Categories</label>
@@ -157,13 +158,15 @@
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const drawToolBtn = document.getElementById('drawToolBtn');
         const connectToolBtn = document.getElementById('connectToolBtn');
-        const saveBtn = document.getElementById('saveBtn');
+        const saveMapBtn = document.getElementById('saveMapBtn');
+        const saveCategoriesBtn = document.getElementById('saveCategoriesBtn');
         const loadMapInput = document.getElementById('loadMapBtn');
         const loadCategoriesInput = document.getElementById('loadCategoriesBtn');
 
         const POINT_SIZE = 10;
         const FONT_SIZE = 16;
         const TEXT_SCALE_THRESHOLD = 0.5;
+        const CLICK_TOLERANCE = 5; // Pixels
 
         let mapData = { points: [], lines: [] };
         let categories = [{ name: 'Default', color: '#3b82f6' }];
@@ -177,6 +180,7 @@
         let lastPan = { x: 0, y: 0 };
         let offset = { x: 0, y: 0 };
         let scale = 1.0;
+        let clickStartPos = { x: 0, y: 0 };
 
         // Helper function to update category buttons
         function updateCategoryButtons() {
@@ -237,51 +241,97 @@
                 y: (y - offset.y) / scale
             };
         }
-
-        canvas.addEventListener('click', (e) => {
+        
+        canvas.addEventListener('mousedown', (e) => {
             const canvasPos = getCanvasCoordinates(e);
-            const worldPos = toWorldCoordinates(canvasPos.x, canvasPos.y);
-            const pointRadius = (POINT_SIZE + 5) * scale;
+            clickStartPos = { x: canvasPos.x, y: canvasPos.y };
+            isPanning = true;
+            lastPan = canvasPos;
+            canvas.style.cursor = 'grabbing';
+        });
 
-            if (tool === 'draw') {
-                const newPoint = {
-                    id: lastPointId++,
-                    x: worldPos.x,
-                    y: worldPos.y,
-                    color: selectedCategoryColor,
-                    text: pointNameInput.value.trim()
-                };
-                mapData.points.push(newPoint);
-                pointNameInput.value = '';
-                draw();
-            } else if (tool === 'connect') {
-                const clickedPoint = mapData.points.find(p => {
-                    const dx = (p.x * scale + offset.x) - canvasPos.x;
-                    const dy = (p.y * scale + offset.y) - canvasPos.y;
-                    return Math.sqrt(dx * dx + dy * dy) < pointRadius;
-                });
+        canvas.addEventListener('mouseup', (e) => {
+            const canvasPos = getCanvasCoordinates(e);
+            const distance = Math.sqrt(
+                Math.pow(canvasPos.x - clickStartPos.x, 2) +
+                Math.pow(canvasPos.y - clickStartPos.y, 2)
+            );
+
+            isPanning = false;
+            canvas.style.cursor = 'grab';
+
+            if (distance < CLICK_TOLERANCE) { // It was a click, not a drag
+                const worldPos = toWorldCoordinates(canvasPos.x, canvasPos.y);
+                const pointRadius = (POINT_SIZE + 5) * scale;
                 
-                if (clickedPoint) {
-                    if (pointToConnect && pointToConnect.id !== clickedPoint.id) {
-                        const line = {
-                            from: pointToConnect.id,
-                            to: clickedPoint.id,
-                            color: pointToConnect.color // Use the color of the first point
-                        };
-                        mapData.lines.push(line);
-                        pointToConnect = null;
-                        draw();
-                    } else {
-                        pointToConnect = clickedPoint;
+                if (tool === 'draw') {
+                    const newPoint = {
+                        id: lastPointId++,
+                        x: worldPos.x,
+                        y: worldPos.y,
+                        color: selectedCategoryColor,
+                        text: pointNameInput.value.trim()
+                    };
+                    mapData.points.push(newPoint);
+                    pointNameInput.value = '';
+                    draw();
+                } else if (tool === 'connect') {
+                    const clickedPoint = mapData.points.find(p => {
+                        const dx = (p.x * scale + offset.x) - canvasPos.x;
+                        const dy = (p.y * scale + offset.y) - canvasPos.y;
+                        return Math.sqrt(dx * dx + dy * dy) < pointRadius;
+                    });
+                    
+                    if (clickedPoint) {
+                        if (pointToConnect && pointToConnect.id !== clickedPoint.id) {
+                            const line = {
+                                from: pointToConnect.id,
+                                to: clickedPoint.id,
+                                color: pointToConnect.color // Use the color of the first point
+                            };
+                            mapData.lines.push(line);
+                            pointToConnect = null;
+                            draw();
+                        } else {
+                            pointToConnect = clickedPoint;
+                        }
                     }
                 }
             }
         });
 
+        canvas.addEventListener('mouseout', () => {
+            isPanning = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                const currentPan = getCanvasCoordinates(e);
+                offset.x += (currentPan.x - lastPan.x);
+                offset.y += (currentPan.y - lastPan.y);
+                lastPan = currentPan;
+                draw();
+            }
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = 1.1;
+            const pos = getCanvasCoordinates(e);
+            
+            const oldScale = scale;
+            scale *= (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
+            scale = Math.max(0.2, Math.min(3, scale));
+
+            offset.x = pos.x - (pos.x - offset.x) * (scale / oldScale);
+            offset.y = pos.y - (pos.y - offset.y) * (scale / oldScale);
+            draw();
+        });
+        
         // Save and Load
-        saveBtn.addEventListener('click', () => {
+        saveMapBtn.addEventListener('click', () => {
             const mapJson = JSON.stringify(mapData);
-            const categoriesJson = JSON.stringify(categories);
             
             // Save map file
             const mapBlob = new Blob([mapJson], { type: 'application/json' });
@@ -290,7 +340,11 @@
             mapA.href = mapUrl;
             mapA.download = 'map.json';
             mapA.click();
+        });
 
+        saveCategoriesBtn.addEventListener('click', () => {
+            const categoriesJson = JSON.stringify(categories);
+            
             // Save categories file
             const categoriesBlob = new Blob([categoriesJson], { type: 'application/json' });
             const categoriesUrl = URL.createObjectURL(categoriesBlob);
@@ -331,43 +385,6 @@
                 };
                 reader.readAsText(file);
             }
-        });
-
-        // Pan and Zoom
-        canvas.addEventListener('mousedown', (e) => {
-            isPanning = true;
-            lastPan = getCanvasCoordinates(e);
-            canvas.style.cursor = 'grabbing';
-        });
-        canvas.addEventListener('mouseup', () => {
-            isPanning = false;
-            canvas.style.cursor = 'grab';
-        });
-        canvas.addEventListener('mouseout', () => {
-            isPanning = false;
-            canvas.style.cursor = 'grab';
-        });
-        canvas.addEventListener('mousemove', (e) => {
-            if (isPanning) {
-                const currentPan = getCanvasCoordinates(e);
-                offset.x += (currentPan.x - lastPan.x);
-                offset.y += (currentPan.y - lastPan.y);
-                lastPan = currentPan;
-                draw();
-            }
-        });
-        canvas.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const zoomFactor = 1.1;
-            const pos = getCanvasCoordinates(e);
-            
-            const oldScale = scale;
-            scale *= (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
-            scale = Math.max(0.2, Math.min(3, scale));
-
-            offset.x = pos.x - (pos.x - offset.x) * (scale / oldScale);
-            offset.y = pos.y - (pos.y - offset.y) * (scale / oldScale);
-            draw();
         });
 
         // Draw function
