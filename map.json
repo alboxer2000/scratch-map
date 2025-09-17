@@ -28,22 +28,5 @@
       "color": "#1f2937",
       "text": "The Park Entrance"
     }
-  ],
-  "lines": [
-    {
-      "from": "point-1",
-      "to": "point-2",
-      "color": "#3b82f6"
-    },
-    {
-      "from": "point-1",
-      "to": "point-4",
-      "color": "#3b82f6"
-    },
-    {
-      "from": "point-3",
-      "to": "point-2",
-      "color": "#f59e0b"
-    }
   ]
 }
