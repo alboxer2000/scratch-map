@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Map Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        canvas {
+            background-color: #ffffff;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            touch-action: none;
+        }
+        .message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #4b5563;
+            z-index: 100;
+        }
+        #category-display-container {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #d1d5db;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loading-message" class="message-box">Loading map data...</div>
+        <canvas id="mapCanvas"></canvas>
+        <div id="category-display-container" class="hidden"></div>
+    </div>
+
+    <script>
+        // Canvas Setup
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        const loadingMessage = document.getElementById('loading-message');
+        const categoryDisplayContainer = document.getElementById('category-display-container');
+        const MAP_DATA_URL = 'https://scratchmap.vercel.app/map.json';
+
+        const POINT_SIZE = 10;
+        const FONT_SIZE = 16;
+        const TEXT_SCALE_THRESHOLD = 0.5;
+
+        // Pan and Zoom Variables
+        let isPanning = false;
+        let lastPan = { x: 0, y: 0 };
+        let offset = { x: 0, y: 0 };
+        let scale = 1.0;
+        let mapData = { points: [], lines: [] };
+
+        // Adjust canvas size for responsiveness
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // Drawing Functions
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw lines
+            mapData.lines.forEach(line => {
+                const fromPoint = mapData.points.find(p => p.id === line.from);
+                const toPoint = mapData.points.find(p => p.id === line.to);
+                if (fromPoint && toPoint) {
+                    ctx.beginPath();
+                    ctx.moveTo(fromPoint.x * scale + offset.x, fromPoint.y * scale + offset.y);
+                    ctx.lineTo(toPoint.x * scale + offset.x, toPoint.y * scale + offset.y);
+                    ctx.strokeStyle = line.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+
+            // Draw points
+            mapData.points.forEach(point => {
+                const pointSize = POINT_SIZE * scale;
+                const canvasX = point.x * scale + offset.x;
+                const canvasY = point.y * scale + offset.y;
+                
+                ctx.beginPath();
+                ctx.arc(canvasX, canvasY, pointSize, 0, 2 * Math.PI);
+                ctx.fillStyle = point.color;
+                ctx.fill();
+
+                if (point.text && scale > TEXT_SCALE_THRESHOLD) {
+                    ctx.font = `${FONT_SIZE * scale}px Inter`;
+                    ctx.fillStyle = '#1f2937';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(point.text, canvasX, canvasY + pointSize + 10);
+                }
+            });
+        }
+
+        // Mouse and Touch Events for Pan
+        canvas.addEventListener('mousedown', (e) => {
+            isPanning = true;
+            lastPan = getCanvasCoordinates(e);
+            canvas.style.cursor = 'grabbing';
+        });
+        canvas.addEventListener('mouseup', () => {
+            isPanning = false;
+            canvas.style.cursor = 'grab';
+        });
+        canvas.addEventListener('mouseout', () => {
+            isPanning = false;
+            canvas.style.cursor = 'grab';
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                const currentPan = getCanvasCoordinates(e);
+                offset.x += (currentPan.x - lastPan.x);
+                offset.y += (currentPan.y - lastPan.y);
+                lastPan = currentPan;
+                draw();
+            }
+        });
+
+        // Zoom functionality with mouse wheel
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = 1.1;
+            const pos = getCanvasCoordinates(e);
+            
+            const oldScale = scale;
+            scale *= (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
+            
+            scale = Math.max(0.2, Math.min(3, scale));
+
+            offset.x = pos.x - (pos.x - offset.x) * (scale / oldScale);
+            offset.y = pos.y - (pos.y - offset.y) * (scale / oldScale);
+
+            draw();
+        });
+
+        function populateCategories() {
+            const uniqueColors = new Set();
+            mapData.points.forEach(point => {
+                uniqueColors.add(point.color);
+            });
+
+            categoryDisplayContainer.innerHTML = '';
+            uniqueColors.forEach(color => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `<span class="category-dot" style="background-color: ${color};"></span>${color}`;
+                categoryDisplayContainer.appendChild(categoryItem);
+            });
+            categoryDisplayContainer.classList.remove('hidden');
+        }
+
+        // Fetch and load the map data
+        async function loadMapData() {
+            try {
+                const response = await fetch(MAP_DATA_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                mapData = await response.json();
+                
+                loadingMessage.classList.add('hidden');
+                
+                // Adjust initial view to center the map
+                if (mapData.points.length > 0) {
+                    const firstPoint = mapData.points[0];
+                    offset.x = canvas.width / 2 - firstPoint.x * scale;
+                    offset.y = canvas.height / 2 - firstPoint.y * scale;
+                }
+
+                populateCategories();
+                resizeCanvas();
+
+            } catch (error) {
+                loadingMessage.textContent = 'Failed to load map data. Please check the URL or your connection.';
+                console.error('Error fetching map data:', error);
+            }
+        }
+
+        window.onload = () => {
+            resizeCanvas();
+            loadMapData();
+        };
+    </script>
+</body>
+</html>
