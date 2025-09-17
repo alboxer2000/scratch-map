@@ -15,205 +15,162 @@
             align-items: center;
             flex-direction: column;
             min-height: 100vh;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-            max-width: 1200px;
-            padding: 1rem;
-        }
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .tool-button {
-            padding: 0.75rem 1.25rem;
-            border-radius: 9999px;
-            background-color: #e5e7eb;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid transparent;
-        }
-        .tool-button:hover {
-            background-color: #d1d5db;
-        }
-        .tool-button.active {
-            background-color: #1f2937;
-            color: #ffffff;
-        }
-        .tool-button.active:hover {
-            background-color: #111827;
-        }
-        .icon {
-            margin-right: 0.5rem;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
         }
         canvas {
             background-color: #ffffff;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            cursor: grab;
             touch-action: none;
             width: 100%;
-            height: auto;
+            height: 100vh;
+            display: block;
         }
-        .input-group {
-            display: flex;
-            gap: 0.5rem;
-            flex-grow: 1;
-        }
-        .input-group input {
-            flex-grow: 1;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 9999px;
-            transition: border-color 0.2s;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #1f2937;
-        }
-        .input-group button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            background-color: #1f2937;
-            color: #ffffff;
-            transition: background-color 0.2s;
-        }
-        .input-group button:hover {
-            background-color: #111827;
-        }
-        .tooltip {
+        .controls {
             position: absolute;
-            background-color: #1f2937;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 10;
-            pointer-events: none;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .tooltip.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        .category-button {
+        .control-group {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 9999px;
-            background-color: #e5e7eb;
-            font-weight: 600;
+            gap: 8px;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: transparent;
+            width: 30px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border-radius: 8px;
+            border: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
             transition: all 0.2s;
             cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+        .category-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.1s;
         }
-        .category-button:hover {
-            background-color: #d1d5db;
-        }
-        .category-button.active {
+        .category-btn.active {
             border-color: #1f2937;
+            transform: scale(1.1);
         }
-        .category-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tool-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .tool-btn {
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            background-color: #e5e7eb;
+        }
+        .tool-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        #loadMapBtn, #loadCategoriesBtn {
+            display: none;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center p-4">
+<body class="bg-gray-100 flex flex-col items-center">
 
-    <div class="container">
-        <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-md">
-            <h1 class="text-3xl font-bold text-gray-800">Community Map</h1>
-        </header>
+    <canvas id="mapCanvas"></canvas>
 
-        <!-- Tools and Controls Section -->
-        <div class="controls">
-            <input type="text" id="pointNameInput" placeholder="Point Name" class="flex-1 min-w-0 h-10 px-4 rounded-full border-2 border-gray-300 focus:outline-none focus:border-gray-800">
+    <div class="controls">
+        <div class="control-group">
+            <input type="text" id="pointName" placeholder="Point Name" class="p-2 border border-gray-300 rounded-lg">
+            <input type="color" id="categoryColorInput" value="#3b82f6">
+            <input type="text" id="categoryNameInput" placeholder="Category Name" class="p-2 border border-gray-300 rounded-lg">
+            <button id="addCategoryBtn" class="btn btn-primary">Add Category</button>
         </div>
-        
-        <div class="controls flex-col md:flex-row">
-            <div class="flex-1 flex flex-wrap gap-2 items-center">
-                <input type="text" id="categoryNameInput" placeholder="New Category Name" class="flex-1 min-w-0 h-10 px-4 rounded-full border-2 border-gray-300 focus:outline-none focus:border-gray-800">
-                <input type="color" id="categoryColorInput" value="#1f2937" class="h-10 w-10 p-1 rounded-full border-2 border-gray-300 cursor-pointer">
-                <button id="addCategoryButton" class="tool-button px-4">Add Category</button>
-            </div>
-            
-            <div id="categoryButtonsContainer" class="flex flex-wrap gap-2">
-                <!-- Dynamic category buttons will be added here -->
-            </div>
+        <div class="categories-container" id="categoryButtons"></div>
+    </div>
 
-            <div class="flex flex-wrap gap-2">
-                <button class="tool-button active" data-tool="add-point">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 9.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18 10.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 14.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                    </svg>
-                </button>
-                <button class="tool-button" data-tool="connect">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.845 2.088l-2.007 2.007A.75.75 0 014.5 22.5h-1.5a.75.75 0 01-.75-.75v-1.5a.75.75 0 01.75-.75H4.5v-1.5m15-1.5v1.007a3 3 0 01-.845 2.088l-2.007 2.007A.75.75 0 0115 22.5h-1.5a.75.75 0 01-.75-.75v-1.5a.75.75 0 01.75-.75H15v-1.5m-6-9H9a.75.75 0 01-.75-.75V8.25m-1.5 0h-3a.75.75 0 00-.75.75v3m-3-3h3A.75.75 0 006 9.75v-3m.75-3h3.75a.75.75 0 01.75.75v2.25m-3-3h3.75a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-3.75" />
-                    </svg>
-                </button>
-                <button class="tool-button" data-tool="clear">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.747 16.299l-2.73-2.73a.75.75 0 00-1.06 0l-2.73 2.73-4.595-4.595a.75.75 0 010-1.06l1.248-1.248.75-.75a.75.75 0 000-1.06L7.29 4.341a.75.75 0 00-.53-1.28H5.25a2.25 2.25 0 00-2.25 2.25v2.25a2.25 2.25 0 002.25 2.25h1.5a.75.75 0 00.53-.22L12 8.79l.53-.53a.75.75 0 00.22-.53V5.25a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v1.5a.75.75 0 00.22.53l.53.53-2.73 2.73a.75.75 0 000 1.06l2.73 2.73 4.595 4.595a.75.75 0 010 1.06l-1.248 1.248a.75.75 0 01-1.06 0L14.747 16.299z" />
-                    </svg>
-                </button>
-                <button class="tool-button" data-tool="save">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l-4.5-4.5M12 19.5l4.5-4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-                <!-- Load button and hidden file input -->
-                <label for="loadFileInput" class="tool-button cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l4.5 4.5M12 4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </label>
-                <input type="file" id="loadFileInput" accept=".json" class="hidden">
-            </div>
-        </div>
-        
-        <canvas id="mapCanvas" class="w-full aspect-video"></canvas>
+    <div class="tool-bar">
+        <button id="drawToolBtn" class="tool-btn active">Add Point</button>
+        <button id="connectToolBtn" class="tool-btn">Connect</button>
+        <button id="saveBtn" class="btn btn-primary">Save Map</button>
+        <label for="loadMapBtn" class="btn btn-primary text-center">Load Map</label>
+        <input type="file" id="loadMapBtn" accept=".json">
+        <label for="loadCategoriesBtn" class="btn btn-primary text-center">Load Categories</label>
+        <input type="file" id="loadCategoriesBtn" accept=".json">
     </div>
 
     <script>
         // Canvas Setup
         const canvas = document.getElementById('mapCanvas');
         const ctx = canvas.getContext('2d');
+        const pointNameInput = document.getElementById('pointName');
+        const categoryColorInput = document.getElementById('categoryColorInput');
+        const categoryNameInput = document.getElementById('categoryNameInput');
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const categoryButtonsContainer = document.getElementById('categoryButtons');
+        const drawToolBtn = document.getElementById('drawToolBtn');
+        const connectToolBtn = document.getElementById('connectToolBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadMapInput = document.getElementById('loadMapBtn');
+        const loadCategoriesInput = document.getElementById('loadCategoriesBtn');
+
         const POINT_SIZE = 10;
         const FONT_SIZE = 16;
-        const TEXT_SCALE_THRESHOLD = 0.5; // Text disappears below this scale
-        let mapData = { points: [], lines: [] };
-        let currentTool = 'add-point';
-        let selectedPoint = null;
-        let activeCategory = { name: "General", color: "#1f2937" };
+        const TEXT_SCALE_THRESHOLD = 0.5;
 
-        // DOM elements
-        const pointNameInput = document.getElementById('pointNameInput');
-        const categoryNameInput = document.getElementById('categoryNameInput');
-        const categoryColorInput = document.getElementById('categoryColorInput');
-        const addCategoryButton = document.getElementById('addCategoryButton');
-        const categoryButtonsContainer = document.getElementById('categoryButtonsContainer');
-        const toolButtons = document.querySelectorAll('.tool-button');
-        const loadFileInput = document.getElementById('loadFileInput');
+        let mapData = { points: [], lines: [] };
+        let categories = [{ name: 'Default', color: '#3b82f6' }];
+        let selectedCategoryColor = categories[0].color;
+        let lastPointId = 0;
+        let tool = 'draw';
+        let pointToConnect = null;
 
         // Pan and Zoom Variables
         let isPanning = false;
@@ -221,88 +178,51 @@
         let offset = { x: 0, y: 0 };
         let scale = 1.0;
 
-        // Adjust canvas size for responsiveness
-        function resizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetWidth * 0.5625; // 16:9 aspect ratio
-            draw();
-        }
-        window.addEventListener('resize', resizeCanvas);
-        window.onload = resizeCanvas;
-
-        // Function to create a category button
-        function createCategoryButton(name, color, isActive = false) {
-            const button = document.createElement('button');
-            button.className = `category-button ${isActive ? 'active' : ''}`;
-            button.dataset.category = name;
-            button.dataset.color = color;
-            button.innerHTML = `<span class="category-dot" style="background-color: ${color};"></span> ${name}`;
-
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                activeCategory = { name: button.dataset.category, color: button.dataset.color };
+        // Helper function to update category buttons
+        function updateCategoryButtons() {
+            categoryButtonsContainer.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.style.backgroundColor = cat.color;
+                btn.dataset.color = cat.color;
+                if (cat.color === selectedCategoryColor) {
+                    btn.classList.add('active');
+                }
+                btn.onclick = () => {
+                    selectedCategoryColor = cat.color;
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                };
+                categoryButtonsContainer.appendChild(btn);
             });
-
-            return button;
         }
 
-        // Add some default categories on load
-        function addDefaultCategories() {
-            const defaultCategories = [
-                { name: "General", color: "#1f2937" },
-                { name: "Park", color: "#3b82f6" },
-                { name: "Restaurant", color: "#ef4444" },
-                { name: "Landmark", color: "#f59e0b" }
-            ];
-            
-            defaultCategories.forEach((cat, index) => {
-                const button = createCategoryButton(cat.name, cat.color, index === 0);
-                categoryButtonsContainer.appendChild(button);
-            });
-
-            // Set the initial active category
-            activeCategory = defaultCategories[0];
-        }
-
-        // Add a new category from user input
-        addCategoryButton.addEventListener('click', () => {
+        // Add category event listener
+        addCategoryBtn.addEventListener('click', () => {
             const name = categoryNameInput.value.trim();
             const color = categoryColorInput.value;
-
-            if (name) {
-                const button = createCategoryButton(name, color, true);
-                document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
-                categoryButtonsContainer.appendChild(button);
-                activeCategory = { name: name, color: color };
+            if (name && color) {
+                categories.push({ name: name, color: color });
+                updateCategoryButtons();
                 categoryNameInput.value = '';
             }
         });
 
-        // Tool Selection
-        toolButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                toolButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                currentTool = button.dataset.tool;
-
-                if (currentTool === 'clear') {
-                    mapData = { points: [], lines: [] };
-                    selectedPoint = null;
-                    offset = { x: 0, y: 0 };
-                    scale = 1.0;
-                    draw();
-                    currentTool = 'add-point';
-                    document.querySelector('[data-tool="add-point"]').classList.add('active');
-                } else if (currentTool === 'save') {
-                    saveMap();
-                    currentTool = 'add-point';
-                    document.querySelector('[data-tool="add-point"]').classList.add('active');
-                }
-            });
+        // Tool selection
+        drawToolBtn.addEventListener('click', () => {
+            tool = 'draw';
+            drawToolBtn.classList.add('active');
+            connectToolBtn.classList.remove('active');
+            pointToConnect = null;
+        });
+        connectToolBtn.addEventListener('click', () => {
+            tool = 'connect';
+            connectToolBtn.classList.add('active');
+            drawToolBtn.classList.remove('active');
         });
 
-        // Drawing Functions
+        // Canvas events
         function getCanvasCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
             return {
@@ -311,78 +231,109 @@
             };
         }
 
-        function getMapCoordinates(e) {
-            const pos = getCanvasCoordinates(e);
+        function toWorldCoordinates(x, y) {
             return {
-                x: (pos.x - offset.x) / scale,
-                y: (pos.y - offset.y) / scale
+                x: (x - offset.x) / scale,
+                y: (y - offset.y) / scale
             };
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+        canvas.addEventListener('click', (e) => {
+            const canvasPos = getCanvasCoordinates(e);
+            const worldPos = toWorldCoordinates(canvasPos.x, canvasPos.y);
+            const pointRadius = (POINT_SIZE + 5) * scale;
 
-            // Draw lines
-            mapData.lines.forEach(line => {
-                const fromPoint = mapData.points.find(p => p.id === line.from);
-                const toPoint = mapData.points.find(p => p.id === line.to);
-                if (fromPoint && toPoint) {
-                    ctx.beginPath();
-                    ctx.moveTo(fromPoint.x * scale + offset.x, fromPoint.y * scale + offset.y);
-                    ctx.lineTo(toPoint.x * scale + offset.x, toPoint.y * scale + offset.y);
-                    ctx.strokeStyle = line.color;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
-
-            // Draw points
-            mapData.points.forEach(point => {
-                const pointSize = POINT_SIZE * scale;
-                const canvasX = point.x * scale + offset.x;
-                const canvasY = point.y * scale + offset.y;
+            if (tool === 'draw') {
+                const newPoint = {
+                    id: lastPointId++,
+                    x: worldPos.x,
+                    y: worldPos.y,
+                    color: selectedCategoryColor,
+                    text: pointNameInput.value.trim()
+                };
+                mapData.points.push(newPoint);
+                pointNameInput.value = '';
+                draw();
+            } else if (tool === 'connect') {
+                const clickedPoint = mapData.points.find(p => {
+                    const dx = (p.x * scale + offset.x) - canvasPos.x;
+                    const dy = (p.y * scale + offset.y) - canvasPos.y;
+                    return Math.sqrt(dx * dx + dy * dy) < pointRadius;
+                });
                 
-                ctx.beginPath();
-                ctx.arc(canvasX, canvasY, pointSize, 0, 2 * Math.PI);
-                ctx.fillStyle = point.color;
-                ctx.fill();
-
-                // Draw text for the point only if scale is above the threshold
-                if (point.text && scale > TEXT_SCALE_THRESHOLD) {
-                    ctx.font = `${FONT_SIZE * scale}px Inter`;
-                    ctx.fillStyle = '#1f2937';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(point.text, canvasX, canvasY + pointSize + 10);
-                }
-            });
-
-            // Highlight selected point
-            if (selectedPoint) {
-                const pointSize = POINT_SIZE * scale;
-                ctx.beginPath();
-                ctx.arc(selectedPoint.x * scale + offset.x, selectedPoint.y * scale + offset.y, pointSize + 3, 0, 2 * Math.PI);
-                ctx.strokeStyle = '#1f2937';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
-        }
-
-        // Check if a point is clicked
-        function getPointAtCoordinates(x, y) {
-            for (let point of mapData.points) {
-                const pointSize = POINT_SIZE * scale;
-                const canvasX = point.x * scale + offset.x;
-                const canvasY = point.y * scale + offset.y;
-                const dist = Math.sqrt(Math.pow(canvasX - x, 2) + Math.pow(canvasY - y, 2));
-                if (dist < pointSize + 5) { // Adjusted hit area for easier clicking
-                    return point;
+                if (clickedPoint) {
+                    if (pointToConnect && pointToConnect.id !== clickedPoint.id) {
+                        const line = {
+                            from: pointToConnect.id,
+                            to: clickedPoint.id,
+                            color: pointToConnect.color // Use the color of the first point
+                        };
+                        mapData.lines.push(line);
+                        pointToConnect = null;
+                        draw();
+                    } else {
+                        pointToConnect = clickedPoint;
+                    }
                 }
             }
-            return null;
-        }
+        });
 
-        // Mouse and Touch Events
+        // Save and Load
+        saveBtn.addEventListener('click', () => {
+            const mapJson = JSON.stringify(mapData);
+            const categoriesJson = JSON.stringify(categories);
+            
+            // Save map file
+            const mapBlob = new Blob([mapJson], { type: 'application/json' });
+            const mapUrl = URL.createObjectURL(mapBlob);
+            const mapA = document.createElement('a');
+            mapA.href = mapUrl;
+            mapA.download = 'map.json';
+            mapA.click();
+
+            // Save categories file
+            const categoriesBlob = new Blob([categoriesJson], { type: 'application/json' });
+            const categoriesUrl = URL.createObjectURL(categoriesBlob);
+            const categoriesA = document.createElement('a');
+            categoriesA.href = categoriesUrl;
+            categoriesA.download = 'category.json';
+            categoriesA.click();
+        });
+
+        loadMapInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        mapData = JSON.parse(event.target.result);
+                        lastPointId = Math.max(0, ...mapData.points.map(p => p.id)) + 1;
+                        draw();
+                    } catch (err) {
+                        console.error('Error parsing map JSON:', err);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        loadCategoriesInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        categories = JSON.parse(event.target.result);
+                        updateCategoryButtons();
+                    } catch (err) {
+                        console.error('Error parsing categories JSON:', err);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Pan and Zoom
         canvas.addEventListener('mousedown', (e) => {
             isPanning = true;
             lastPan = getCanvasCoordinates(e);
@@ -405,52 +356,6 @@
                 draw();
             }
         });
-
-        canvas.addEventListener('click', (e) => {
-            const pos = getCanvasCoordinates(e);
-            const mapPos = getMapCoordinates(e);
-
-            if (currentTool === 'add-point') {
-                const newPoint = {
-                    id: crypto.randomUUID(),
-                    x: mapPos.x,
-                    y: mapPos.y,
-                    color: activeCategory.color,
-                    text: pointNameInput.value.trim()
-                };
-                mapData.points.push(newPoint);
-                draw();
-                pointNameInput.value = ''; // Clear the input after adding a point
-            } else if (currentTool === 'connect') {
-                const clickedPoint = getPointAtCoordinates(pos.x, pos.y);
-                if (clickedPoint) {
-                    if (!selectedPoint) {
-                        selectedPoint = clickedPoint;
-                        draw(); // Highlight the first selected point
-                    } else if (selectedPoint.id !== clickedPoint.id) {
-                        // Connect the two points and reset
-                        const newLine = {
-                            from: selectedPoint.id,
-                            to: clickedPoint.id,
-                            color: selectedPoint.color
-                        };
-                        mapData.lines.push(newLine);
-                        selectedPoint = null;
-                        draw();
-                    } else {
-                        // Clicked the same point twice, unselect it
-                        selectedPoint = null;
-                        draw();
-                    }
-                } else {
-                    // Clicked on empty space, unselect any point
-                    selectedPoint = null;
-                    draw();
-                }
-            }
-        });
-
-        // Zoom functionality with mouse wheel
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = 1.1;
@@ -458,60 +363,65 @@
             
             const oldScale = scale;
             scale *= (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
-            
-            // Clamp scale to prevent it from getting too small or too large
             scale = Math.max(0.2, Math.min(3, scale));
 
-            // Adjust offset to zoom centered on the mouse position
             offset.x = pos.x - (pos.x - offset.x) * (scale / oldScale);
             offset.y = pos.y - (pos.y - offset.y) * (scale / oldScale);
-
             draw();
         });
 
-        // Save and Load Functions
-        function saveMap() {
-            const dataStr = JSON.stringify(mapData, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'community_map.json';
-            a.click();
-            URL.revokeObjectURL(url);
+        // Draw function
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (mapData.lines) {
+                mapData.lines.forEach(line => {
+                    const fromPoint = mapData.points.find(p => p.id === line.from);
+                    const toPoint = mapData.points.find(p => p.id === line.to);
+                    if (fromPoint && toPoint) {
+                        ctx.beginPath();
+                        ctx.moveTo(fromPoint.x * scale + offset.x, fromPoint.y * scale + offset.y);
+                        ctx.lineTo(toPoint.x * scale + offset.x, toPoint.y * scale + offset.y);
+                        ctx.strokeStyle = line.color;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+            }
+
+            if (mapData.points) {
+                mapData.points.forEach(point => {
+                    const pointSize = POINT_SIZE * scale;
+                    const canvasX = point.x * scale + offset.x;
+                    const canvasY = point.y * scale + offset.y;
+                    
+                    ctx.beginPath();
+                    ctx.arc(canvasX, canvasY, pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = point.color;
+                    ctx.fill();
+
+                    if (point.text && scale > TEXT_SCALE_THRESHOLD) {
+                        ctx.font = `bold ${FONT_SIZE * scale}px Arial`;
+                        ctx.fillStyle = '#1f2937';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(point.text, canvasX, canvasY + pointSize + 10);
+                    }
+                });
+            }
         }
 
-        // Load map from a file
-        loadFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const loadedData = JSON.parse(event.target.result);
-                        if (loadedData && loadedData.points && loadedData.lines) {
-                            mapData = loadedData;
-                            // Reset pan and zoom to show the loaded map
-                            offset = { x: 0, y: 0 };
-                            scale = 1.0;
-                            draw();
-                            // Optional: provide a message to the user
-                            console.log("Map loaded successfully!");
-                        } else {
-                            // Optional: provide a message to the user
-                            console.error("Invalid map data. Please ensure the JSON is correctly formatted.");
-                        }
-                    } catch (error) {
-                        // Optional: provide a message to the user
-                        console.error("Invalid JSON format. Please select a valid JSON file.", error);
-                    }
-                };
-                reader.readAsText(file);
-            }
-        });
-
-        // Initial setup
-        addDefaultCategories();
+        // Initialize
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            updateCategoryButtons();
+        };
     </script>
 </body>
 </html>
