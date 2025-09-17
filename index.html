@@ -155,39 +155,43 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw lines
-            mapData.lines.forEach(line => {
-                const fromPoint = mapData.points.find(p => p.id === line.from);
-                const toPoint = mapData.points.find(p => p.id === line.to);
-                if (fromPoint && toPoint) {
+            // Draw lines if they exist
+            if (mapData.lines) {
+                mapData.lines.forEach(line => {
+                    const fromPoint = mapData.points.find(p => p.id === line.from);
+                    const toPoint = mapData.points.find(p => p.id === line.to);
+                    if (fromPoint && toPoint) {
+                        ctx.beginPath();
+                        ctx.moveTo(fromPoint.x * scale + offset.x, fromPoint.y * scale + offset.y);
+                        ctx.lineTo(toPoint.x * scale + offset.x, toPoint.y * scale + offset.y);
+                        ctx.strokeStyle = line.color;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+            }
+
+            // Draw points if they exist
+            if (mapData.points) {
+                mapData.points.forEach(point => {
+                    const pointSize = POINT_SIZE * scale;
+                    const canvasX = point.x * scale + offset.x;
+                    const canvasY = point.y * scale + offset.y;
+                    
                     ctx.beginPath();
-                    ctx.moveTo(fromPoint.x * scale + offset.x, fromPoint.y * scale + offset.y);
-                    ctx.lineTo(toPoint.x * scale + offset.x, toPoint.y * scale + offset.y);
-                    ctx.strokeStyle = line.color;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
+                    ctx.arc(canvasX, canvasY, pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = point.color;
+                    ctx.fill();
 
-            // Draw points
-            mapData.points.forEach(point => {
-                const pointSize = POINT_SIZE * scale;
-                const canvasX = point.x * scale + offset.x;
-                const canvasY = point.y * scale + offset.y;
-                
-                ctx.beginPath();
-                ctx.arc(canvasX, canvasY, pointSize, 0, 2 * Math.PI);
-                ctx.fillStyle = point.color;
-                ctx.fill();
-
-                if (point.text && scale > TEXT_SCALE_THRESHOLD) {
-                    ctx.font = `bold ${FONT_SIZE * scale}px Arial`;
-                    ctx.fillStyle = '#1f2937';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(point.text, canvasX, canvasY + pointSize + 10);
-                }
-            });
+                    if (point.text && scale > TEXT_SCALE_THRESHOLD) {
+                        ctx.font = `bold ${FONT_SIZE * scale}px Arial`;
+                        ctx.fillStyle = '#1f2937';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(point.text, canvasX, canvasY + pointSize + 10);
+                    }
+                });
+            }
         }
 
         // Mouse and Touch Events
