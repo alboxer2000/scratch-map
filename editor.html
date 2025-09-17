@@ -243,11 +243,14 @@
         }
         
         canvas.addEventListener('mousedown', (e) => {
-            const canvasPos = getCanvasCoordinates(e);
-            clickStartPos = { x: canvasPos.x, y: canvasPos.y };
-            isPanning = true;
-            lastPan = canvasPos;
-            canvas.style.cursor = 'grabbing';
+            // Only start panning on left-click
+            if (e.button === 0) { 
+                const canvasPos = getCanvasCoordinates(e);
+                clickStartPos = { x: canvasPos.x, y: canvasPos.y };
+                isPanning = true;
+                lastPan = canvasPos;
+                canvas.style.cursor = 'grabbing';
+            }
         });
 
         canvas.addEventListener('mouseup', (e) => {
@@ -260,7 +263,8 @@
             isPanning = false;
             canvas.style.cursor = 'grab';
 
-            if (distance < CLICK_TOLERANCE) { // It was a click, not a drag
+            // Only add points or connect on left-click and if it's a click, not a drag
+            if (e.button === 0 && distance < CLICK_TOLERANCE) { 
                 const worldPos = toWorldCoordinates(canvasPos.x, canvasPos.y);
                 const pointRadius = (POINT_SIZE + 5) * scale;
                 
@@ -297,6 +301,69 @@
                         }
                     }
                 }
+            }
+        });
+
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // Prevent the default context menu
+            const canvasPos = getCanvasCoordinates(e);
+            
+            // First, check for a clicked point
+            const pointRadius = (POINT_SIZE + 5) * scale;
+            const clickedPoint = mapData.points.find(p => {
+                const dx = (p.x * scale + offset.x) - canvasPos.x;
+                const dy = (p.y * scale + offset.y) - canvasPos.y;
+                return Math.sqrt(dx * dx + dy * dy) < pointRadius;
+            });
+
+            if (clickedPoint) {
+                // Remove point
+                mapData.points = mapData.points.filter(p => p.id !== clickedPoint.id);
+                // Remove all lines connected to the point
+                mapData.lines = mapData.lines.filter(line => line.from !== clickedPoint.id && line.to !== clickedPoint.id);
+                
+                // Recalculate lastPointId to ensure it is always unique for new points
+                const maxId = mapData.points.length > 0 ? Math.max(...mapData.points.map(p => p.id)) : -1;
+                lastPointId = maxId + 1;
+
+                draw();
+                return; // Exit the function after a point is handled
+            }
+
+            // If no point was clicked, check for a clicked line
+            const lineClickTolerance = 5 / scale; // A generous click tolerance for lines
+            let removedLine = false;
+            for (let i = 0; i < mapData.lines.length; i++) {
+                const line = mapData.lines[i];
+                const fromPoint = mapData.points.find(p => p.id === line.from);
+                const toPoint = mapData.points.find(p => p.id === line.to);
+
+                if (fromPoint && toPoint) {
+                    const fromX = fromPoint.x;
+                    const fromY = fromPoint.y;
+                    const toX = toPoint.x;
+                    const toY = toPoint.y;
+                    const clickX = toWorldCoordinates(canvasPos.x, canvasPos.y).x;
+                    const clickY = toWorldCoordinates(canvasPos.y, canvasPos.y).y;
+
+                    const A = fromX - toX;
+                    const B = fromY - toY;
+                    const C = fromX * B - fromY * A;
+                    const dist = Math.abs(A * clickX + B * clickY + C) / Math.sqrt(A * A + B * B);
+
+                    // Check if click is on the line segment
+                    const dotProduct = (clickX - fromX) * (toX - fromX) + (clickY - fromY) * (toY - fromY);
+                    const squaredLength = (toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY);
+                    
+                    if (dotProduct >= 0 && dotProduct <= squaredLength && dist < lineClickTolerance) {
+                        mapData.lines.splice(i, 1);
+                        removedLine = true;
+                        break;
+                    }
+                }
+            }
+            if (removedLine) {
+                draw();
             }
         });
 
